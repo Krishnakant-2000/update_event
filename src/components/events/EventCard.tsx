@@ -1,7 +1,9 @@
 import React from 'react';
-import { Event } from '../../types/event.types';
+import { Event, EventStatus } from '../../types/event.types';
 import { LazyImage } from '../common/LazyImage';
 import { LazyVideo } from '../common/LazyVideo';
+import { StatusBadge } from '../common/StatusBadge';
+import { CountdownTimer } from '../common/CountdownTimer';
 
 interface EventCardProps {
   event: Event;
@@ -18,6 +20,10 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
       minute: '2-digit'
     });
   };
+
+  // Calculate reaction count
+  const reactionCount = event.reactions?.length || 0;
+  const totalParticipants = (event.participantIds?.length || 0) + (event.interestedIds?.length || 0);
 
   return (
     <div
@@ -41,9 +47,16 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
             alt={`${event.title} thumbnail`}
             className="event-card-thumbnail"
           />
+
+          {/* Badges overlay */}
+          <div className="event-card-badges">
+            {event.isTrending && <StatusBadge type="trending" size="small" />}
+            {event.status === EventStatus.ONGOING && <StatusBadge type="live" size="small" />}
+            {event.isOfficial && <StatusBadge type="official" size="small" />}
+          </div>
         </div>
       )}
-      
+
       {/* Lazy load video preview if available and no thumbnail */}
       {!event.thumbnailUrl && event.videoUrl && (
         <div className="event-card-media">
@@ -52,39 +65,73 @@ export const EventCard: React.FC<EventCardProps> = ({ event, onClick }) => {
             className="event-card-video"
             controls={false}
           />
+
+          {/* Badges overlay */}
+          <div className="event-card-badges">
+            {event.isTrending && <StatusBadge type="trending" size="small" />}
+            {event.status === EventStatus.ONGOING && <StatusBadge type="live" size="small" />}
+            {event.isOfficial && <StatusBadge type="official" size="small" />}
+          </div>
         </div>
       )}
-      
+
       <div className="event-card-content">
         <div className="event-card-header">
-          <h3 className="event-card-title">{event.title}</h3>
-          {event.isOfficial && (
-            <span className="event-card-badge" aria-label="Official event">
-              Official
-            </span>
+          <div className="event-card-header-top">
+            <h3 className="event-card-title">{event.title}</h3>
+            <StatusBadge type={event.eventType} size="small" showIcon={true} />
+          </div>
+
+          {/* Countdown timer for upcoming events */}
+          {event.status === EventStatus.UPCOMING && (
+            <CountdownTimer targetDate={event.startDate} compact={true} className="event-card-countdown" />
           )}
         </div>
-        
+
         <div className="event-card-details">
           <div className="event-card-detail">
-            <span className="event-card-label">Sport:</span>
+            <span className="event-card-icon" aria-hidden="true">🏅</span>
             <span className="event-card-value">{event.sport}</span>
           </div>
-          
+
           <div className="event-card-detail">
-            <span className="event-card-label">Location:</span>
+            <span className="event-card-icon" aria-hidden="true">📍</span>
             <span className="event-card-value">{event.location}</span>
           </div>
-          
+
           <div className="event-card-detail">
-            <span className="event-card-label">Date:</span>
+            <span className="event-card-icon" aria-hidden="true">📅</span>
             <span className="event-card-value">{formatDate(event.startDate)}</span>
           </div>
-          
-          {event.participantCount !== undefined && (
-            <div className="event-card-detail">
-              <span className="event-card-label">Participants:</span>
-              <span className="event-card-value">{event.participantCount}</span>
+        </div>
+
+        {/* Engagement metrics footer */}
+        <div className="event-card-metrics">
+          {reactionCount > 0 && (
+            <div className="metric-item">
+              <span className="metric-icon" aria-hidden="true">❤️</span>
+              <span className="metric-value">{reactionCount}</span>
+            </div>
+          )}
+
+          {event.commentCount > 0 && (
+            <div className="metric-item">
+              <span className="metric-icon" aria-hidden="true">💬</span>
+              <span className="metric-value">{event.commentCount}</span>
+            </div>
+          )}
+
+          {totalParticipants > 0 && (
+            <div className="metric-item">
+              <span className="metric-icon" aria-hidden="true">👥</span>
+              <span className="metric-value">{totalParticipants}</span>
+            </div>
+          )}
+
+          {event.viewCount > 0 && (
+            <div className="metric-item">
+              <span className="metric-icon" aria-hidden="true">👁️</span>
+              <span className="metric-value">{event.viewCount}</span>
             </div>
           )}
         </div>
