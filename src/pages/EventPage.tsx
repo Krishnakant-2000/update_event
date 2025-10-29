@@ -1,4 +1,5 @@
 import React, { useState, lazy, Suspense, useEffect } from 'react';
+import { AmaPlayerChallenges } from '../components/events/AmaPlayerChallenges';
 import { EventCategory } from '../types/event.types';
 import { EventTabs } from '../components/events/EventTabs';
 import { EventList } from '../components/events/EventList';
@@ -215,6 +216,9 @@ export const EventPage: React.FC<EventPageProps> = ({
           />
         </div>
       </div>
+
+      {/* AmaPlayer Challenges Promo Section */}
+      <AmaPlayerChallenges />
 
       {/* Requirement 1.1: Display three navigation options */}
       <EventTabs
